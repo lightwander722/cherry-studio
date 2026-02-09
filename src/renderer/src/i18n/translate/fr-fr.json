@@ -4935,6 +4935,15 @@
       "docs_check": "Voir",
       "docs_more_details": "Obtenir plus de détails",
       "get_api_key": "Cliquez ici pour obtenir une clé",
+      "import_export": {
+        "export_button": "[to be translated]:Export Config",
+        "export_failed": "[to be translated]:Export failed",
+        "export_success": "[to be translated]:Export success",
+        "import_button": "[to be translated]:Import Config",
+        "import_failed": "[to be translated]:Import failed",
+        "import_invalid": "[to be translated]:Import failed: invalid file format",
+        "import_success": "[to be translated]:Import complete. The app will restart automatically"
+      },
       "misc": "autre",
       "no_models_for_check": "Aucun modèle détectable (par exemple, modèle de chat)",
       "not_checked": "Non vérifié",

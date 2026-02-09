@@ -4935,6 +4935,15 @@
       "docs_check": "Anzeigen",
       "docs_more_details": "Weitere Details anzeigen",
       "get_api_key": "Hier klicken um Schlüssel zu erhalten",
+      "import_export": {
+        "export_button": "[to be translated]:Export Config",
+        "export_failed": "[to be translated]:Export failed",
+        "export_success": "[to be translated]:Export success",
+        "import_button": "[to be translated]:Import Config",
+        "import_failed": "[to be translated]:Import failed",
+        "import_invalid": "[to be translated]:Import failed: invalid file format",
+        "import_success": "[to be translated]:Import complete. The app will restart automatically"
+      },
       "misc": "Sonstige",
       "no_models_for_check": "Keine testbaren Modelle (z.B. Chat-Modelle)",
       "not_checked": "Nicht getestet",

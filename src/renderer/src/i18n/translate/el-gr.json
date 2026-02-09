@@ -4935,6 +4935,15 @@
       "docs_check": "Άνοιγμα",
       "docs_more_details": "Λάβετε περισσότερες λεπτομέρειες",
       "get_api_key": "Κάντε κλικ εδώ για να πάρετε κλειδί",
+      "import_export": {
+        "export_button": "[to be translated]:Export Config",
+        "export_failed": "[to be translated]:Export failed",
+        "export_success": "[to be translated]:Export success",
+        "import_button": "[to be translated]:Import Config",
+        "import_failed": "[to be translated]:Import failed",
+        "import_invalid": "[to be translated]:Import failed: invalid file format",
+        "import_success": "[to be translated]:Import complete. The app will restart automatically"
+      },
       "misc": "Άλλο",
       "no_models_for_check": "Δεν υπάρχουν μοντέλα για έλεγχο (π.χ. μοντέλα συνομιλίας)",
       "not_checked": "Δεν ελέγχεται",

@@ -4935,6 +4935,15 @@
       "docs_check": "檢查",
       "docs_more_details": "檢視更多細節",
       "get_api_key": "點選這裡取得金鑰",
+      "import_export": {
+        "export_button": "匯出設定",
+        "export_failed": "匯出失敗",
+        "export_success": "匯出成功",
+        "import_button": "匯入設定",
+        "import_failed": "匯入失敗",
+        "import_invalid": "匯入失敗，檔案格式不正確",
+        "import_success": "匯入完成，應用程式將自動重新啟動"
+      },
       "misc": "其他",
       "no_models_for_check": "沒有可以被檢查的模型（例如對話模型）",
       "not_checked": "未檢查",

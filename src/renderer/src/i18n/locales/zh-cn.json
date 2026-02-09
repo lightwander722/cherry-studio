@@ -4935,6 +4935,15 @@
       "docs_check": "查看",
       "docs_more_details": "获取更多详情",
       "get_api_key": "点击这里获取密钥",
+      "import_export": {
+        "export_button": "导出配置",
+        "export_failed": "导出失败",
+        "export_success": "导出成功",
+        "import_button": "导入配置",
+        "import_failed": "导入失败",
+        "import_invalid": "导入失败，文件格式不正确",
+        "import_success": "导入完成，应用将自动重启"
+      },
       "misc": "其他",
       "no_models_for_check": "没有可以被检测的模型（例如对话模型）",
       "not_checked": "未检测",

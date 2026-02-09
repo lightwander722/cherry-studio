@@ -13,9 +13,10 @@ import ImageStorage from '@renderer/services/ImageStorage'
 import type { Provider, ProviderType } from '@renderer/types'
 import { isSystemProvider } from '@renderer/types'
 import { getFancyProviderName, matchKeywordsInModel, matchKeywordsInProvider, uuid } from '@renderer/utils'
+import { download } from '@renderer/utils/download'
 import type { MenuProps } from 'antd'
 import { Button, Dropdown, Input, Tag } from 'antd'
-import { GripVertical, PlusIcon, Search, UserPen } from 'lucide-react'
+import { Download, GripVertical, PlusIcon, Search, Upload, UserPen } from 'lucide-react'
 import type { FC } from 'react'
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,6 +32,39 @@ import UrlSchemaInfoPopup from './UrlSchemaInfoPopup'
 const logger = loggerService.withContext('ProviderList')
 
 const BUTTON_WRAPPER_HEIGHT = 50
+const PROVIDER_CONFIG_FILENAME = 'cherry-studio-providers.json'
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+const parseJson = <T,>(value: string, fallback: T, context: string): T => {
+  try {
+    return JSON.parse(value) as T
+  } catch (error) {
+    logger.warn(`${context} JSON parse failed`, error as Error)
+    return fallback
+  }
+}
+
+const resolvePersistedLlm = (state: Record<string, unknown>): Record<string, unknown> => {
+  const rawLlm = state.llm
+  if (typeof rawLlm === 'string') {
+    return parseJson<Record<string, unknown>>(rawLlm, {}, 'llm state')
+  }
+  if (isRecord(rawLlm)) {
+    return rawLlm
+  }
+  return {}
+}
+
+const normalizeProviders = (value: unknown): Provider[] => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value.filter((item) => isRecord(item) && typeof item.id === 'string') as Provider[]
+}
 
 const getIsOvmsSupported = async (): Promise<boolean> => {
   try {
@@ -319,6 +353,117 @@ const ProviderList: FC = () => {
     [handleReorder]
   )
 
+  const handleExportProviders = useCallback(() => {
+    try {
+      const raw = localStorage.getItem('persist:cherry-studio')
+      if (!raw) {
+        logger.warn('persist:cherry-studio not found in localStorage')
+        window.toast.error(t('settings.provider.import_export.export_failed'))
+        return
+      }
+
+      const state = parseJson<Record<string, unknown>>(raw, {}, 'persist:cherry-studio')
+      if (!isRecord(state)) {
+        logger.warn('persist:cherry-studio is not a valid object')
+        window.toast.error(t('settings.provider.import_export.export_failed'))
+        return
+      }
+
+      const llm = resolvePersistedLlm(state)
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        providers: normalizeProviders(llm.providers),
+        settings: isRecord(llm.settings) ? llm.settings : {}
+      }
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+      const blobUrl = URL.createObjectURL(blob)
+      download(blobUrl, PROVIDER_CONFIG_FILENAME)
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 0)
+      logger.info('Exported provider config', { count: payload.providers.length })
+      window.toast.success(t('settings.provider.import_export.export_success'))
+    } catch (error) {
+      logger.error('Export provider config failed', error as Error)
+      window.toast.error(t('settings.provider.import_export.export_failed'))
+    }
+  }, [t])
+
+  const handleImportProviders = useCallback(() => {
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.accept = '.json,application/json'
+
+    fileInput.onchange = async () => {
+      const file = fileInput.files?.[0]
+      fileInput.remove()
+
+      if (!file) {
+        return
+      }
+
+      try {
+        const text = await file.text()
+        const imported = parseJson<Record<string, unknown>>(text, {}, 'imported provider config')
+        if (!isRecord(imported)) {
+          window.toast.error(t('settings.provider.import_export.import_invalid'))
+          return
+        }
+
+        const importedProviders = normalizeProviders(imported.providers)
+        const importedSettings = isRecord(imported.settings) ? imported.settings : {}
+
+        const raw = localStorage.getItem('persist:cherry-studio')
+        if (!raw) {
+          logger.warn('persist:cherry-studio not found in localStorage')
+          window.toast.error(t('settings.provider.import_export.import_failed'))
+          return
+        }
+
+        const state = parseJson<Record<string, unknown>>(raw, {}, 'persist:cherry-studio')
+        if (!isRecord(state)) {
+          logger.warn('persist:cherry-studio is not a valid object')
+          window.toast.error(t('settings.provider.import_export.import_failed'))
+          return
+        }
+
+        const llm = resolvePersistedLlm(state)
+        const currentProviders = normalizeProviders(llm.providers)
+        const providerById = new Map<string, Provider>(currentProviders.map((provider) => [provider.id, provider]))
+        importedProviders.forEach((provider) => providerById.set(provider.id, provider))
+
+        const mergedProviders = Array.from(providerById.values())
+        const mergedSettings = {
+          ...(isRecord(llm.settings) ? llm.settings : {}),
+          ...importedSettings
+        }
+
+        const nextLlm = {
+          ...llm,
+          providers: mergedProviders,
+          settings: mergedSettings
+        }
+
+        const nextState = {
+          ...state,
+          llm: JSON.stringify(nextLlm)
+        }
+
+        localStorage.setItem('persist:cherry-studio', JSON.stringify(nextState))
+        logger.info('Imported provider config', {
+          totalProviders: mergedProviders.length,
+          importedProviders: importedProviders.length
+        })
+        window.toast.success(t('settings.provider.import_export.import_success'))
+        setTimeoutTimer('provider-import-reload', () => window.api.reload(), 800)
+      } catch (error) {
+        logger.error('Import provider config failed', error as Error)
+        window.toast.error(t('settings.provider.import_export.import_failed'))
+      }
+    }
+
+    fileInput.click()
+  }, [setTimeoutTimer, t])
+
   return (
     <Container className="selectable">
       <ProviderListContainer>
@@ -340,6 +485,24 @@ const ProviderList: FC = () => {
             disabled={dragging}
           />
         </AddButtonWrapper>
+        <AddButtonWrapper>
+          <ImportExportRow>
+            <Button
+              style={{ flex: 1, borderRadius: 'var(--list-item-border-radius)' }}
+              icon={<Upload size={16} />}
+              onClick={handleImportProviders}
+              disabled={dragging}>
+              {t('settings.provider.import_export.import_button')}
+            </Button>
+            <Button
+              style={{ flex: 1, borderRadius: 'var(--list-item-border-radius)' }}
+              icon={<Download size={16} />}
+              onClick={handleExportProviders}
+              disabled={dragging}>
+              {t('settings.provider.import_export.export_button')}
+            </Button>
+          </ImportExportRow>
+        </AddButtonWrapper>
         <DraggableVirtualList
           ref={listRef}
           list={filteredProviders}
@@ -349,7 +512,7 @@ const ProviderList: FC = () => {
           itemKey={itemKey}
           overscan={3}
           style={{
-            height: `calc(100% - 2 * ${BUTTON_WRAPPER_HEIGHT}px)`
+            height: `calc(100% - 3 * ${BUTTON_WRAPPER_HEIGHT}px)`
           }}
           scrollerStyle={{
             padding: 8,
@@ -467,6 +630,12 @@ const AddButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
   padding: 10px 8px;
+`
+
+const ImportExportRow = styled.div`
+  display: flex;
+  gap: 8px;
+  width: 100%;
 `
 
 export default ProviderList

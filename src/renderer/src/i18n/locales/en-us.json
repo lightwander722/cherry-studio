@@ -4935,6 +4935,15 @@
       "docs_check": "Check",
       "docs_more_details": "for more details",
       "get_api_key": "Get API Key",
+      "import_export": {
+        "export_button": "Export Config",
+        "export_failed": "Export failed",
+        "export_success": "Export success",
+        "import_button": "Import Config",
+        "import_failed": "Import failed",
+        "import_invalid": "Import failed: invalid file format",
+        "import_success": "Import complete. The app will restart automatically"
+      },
       "misc": "Other",
       "no_models_for_check": "No models available for checking (e.g. chat models)",
       "not_checked": "Not Checked",

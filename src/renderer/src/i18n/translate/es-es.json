@@ -4935,6 +4935,15 @@
       "docs_check": "Ver",
       "docs_more_details": "Obtener más detalles",
       "get_api_key": "Haga clic aquí para obtener la clave",
+      "import_export": {
+        "export_button": "[to be translated]:Export Config",
+        "export_failed": "[to be translated]:Export failed",
+        "export_success": "[to be translated]:Export success",
+        "import_button": "[to be translated]:Import Config",
+        "import_failed": "[to be translated]:Import failed",
+        "import_invalid": "[to be translated]:Import failed: invalid file format",
+        "import_success": "[to be translated]:Import complete. The app will restart automatically"
+      },
       "misc": "otro",
       "no_models_for_check": "No hay modelos disponibles para revisar (por ejemplo, modelos de conversación)",
       "not_checked": "No verificado",
